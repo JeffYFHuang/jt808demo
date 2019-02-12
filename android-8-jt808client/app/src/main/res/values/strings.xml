@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CVA JT808 TRACKER</string>
+    <string name="server">server</string>
+    <string name="port">port</string>
+</resources>

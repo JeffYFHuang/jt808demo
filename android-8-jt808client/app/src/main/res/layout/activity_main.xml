@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/txt_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:layout_marginTop="20dp"
+        android:textSize="30dp"
+        android:text="Not Started"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="46dp"
+        android:orientation="horizontal" >
+        <TextView
+            android:id="@+id/servertag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="server:"
+            />
+        <EditText
+            android:id="@+id/server"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="server"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="64dp"
+        android:orientation="horizontal" >
+        <TextView
+            android:id="@+id/porttag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="port:"
+            />
+        <EditText
+            android:id="@+id/port"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="port"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal" >
+        <Button
+            android:id="@+id/btn_start_tracking"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start tracking"
+            android:enabled="false"
+            android:layout_gravity="center"
+            />
+        <Button
+            android:id="@+id/btn_stop_tracking"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Stop tracking"
+            android:enabled="false"
+            android:layout_gravity="center"
+            />
+    </LinearLayout>
+</LinearLayout>
