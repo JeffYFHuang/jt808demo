@@ -47,10 +47,11 @@ public class BackgroundService extends Service implements ClientStateCallback{
     private LocationManager mLocationManager;
     private NotificationManager notificationManager;
 
-    private final int LOCATION_INTERVAL = 0;
+    private final int LOCATION_INTERVAL = 2000;
     private final int LOCATION_DISTANCE = 0;
 
     private Timer mTimer = null;
+    private TimerTask mUploadTimerTask = null;
 
     private boolean isRunning  = false;
     private SharedPreferences mPrefs;
@@ -130,8 +131,6 @@ public class BackgroundService extends Service implements ClientStateCallback{
         mRegisterReqBuilder = new RegisterRequest.Builder();
         mLocationMessageBuilder  = new LocationMessage.Builder();
 
-        mJT808Client = new JT808Client();
-
         startForeground(12345678, getNotification());
     }
 
@@ -140,8 +139,8 @@ public class BackgroundService extends Service implements ClientStateCallback{
     {
         super.onDestroy();
         mJT808Client.close();
+        mJT808Client = null;
         stopSendLocation();
-        //mJT808Client = null;
         if (mLocationManager != null) {
             try {
                 mLocationManager.removeUpdates(mLocationListener);
@@ -180,7 +179,10 @@ public class BackgroundService extends Service implements ClientStateCallback{
         mPort = mPrefs.getInt(ClientConstants.PREF_KEY_PORT, ClientConstants.PREF_DEFAULT_PORT);
         mAuthCode = mPrefs.getString(ClientConstants.PREF_KEY_AUTH_CODE, null);
 
-        connectToServer(mHost, mPort);
+        if (mJT808Client == null) {
+            mJT808Client = new JT808Client();
+            connectToServer(mHost, mPort);
+        }
     }
 
     public void stopTracking() {
@@ -331,21 +333,37 @@ public class BackgroundService extends Service implements ClientStateCallback{
     }
 
     private void startSendLocation(){
+        Log.d(TAG, "startSendLocation");
         if(mTimer == null) {
             mTimer = new Timer();
         }
+
+        if (mUploadTimerTask == null) {
+            mUploadTimerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    sendLocation();
+                }
+            };
+        }
+
         mTimer.schedule(mUploadTimerTask, 5000, 5000);
     }
 
     private void stopSendLocation(){
-        if(mTimer != null)
+        Log.d(TAG, "stopSendLocation");
+        if(mTimer != null) {
+            Log.d(TAG, "cancel timer");
             mTimer.cancel();
+            mTimer = null;
+            mUploadTimerTask = null;
+        }
     }
 
-    private TimerTask mUploadTimerTask = new TimerTask() {
+    /*private TimerTask mUploadTimerTask = new TimerTask() {
         @Override
         public void run() {
             sendLocation();
         }
-    };
+    };*/
 }
