@@ -47,7 +47,7 @@ public class BackgroundService extends Service implements ClientStateCallback{
     private LocationManager mLocationManager;
     private NotificationManager notificationManager;
 
-    private final int LOCATION_INTERVAL = 2000;
+    private final int LOCATION_INTERVAL = 1000;
     private final int LOCATION_DISTANCE = 0;
 
     private Timer mTimer = null;

@@ -77,7 +77,11 @@ public class MainActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(activity, wantPermission) != PackageManager.PERMISSION_GRANTED) {
             return null;
         }
-        String phone = phoneMgr.getLine1Number().substring(1,13);
+        String phone = phoneMgr.getLine1Number();
+        if (phone.length() > 12)
+            phone = phone.substring(1,13);
+        else
+            phone = phone.substring(0,12);
         Log.i(TAG, phone);
         long l = 0;
         try {
@@ -102,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (permissions[0] == permission.READ_PHONE_STATE)
+                    //if (permissions[0] == permission.READ_PHONE_STATE)
                         mPhone = getPhone();
                 } else {
                     Toast.makeText(activity,"Permission Denied. We can't get phone number.", Toast.LENGTH_LONG).show();
@@ -167,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
                 .withListener(new PermissionListener() {
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse response) {
+                        gpsService.setPhone(mPhone);
                         gpsService.startTracking();
                         mTracking = true;
                         toggleButtons();
@@ -213,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
             String name = className.getClassName();
             if (name.endsWith("BackgroundService")) {
                 gpsService = ((BackgroundService.LocationServiceBinder) service).getService();
-                gpsService.setPhone(mPhone);
                 btnStartTracking.setEnabled(true);
                 txtStatus.setText("GPS Ready");
             }
