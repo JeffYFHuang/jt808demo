@@ -59,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.port)
     TextView serverPort;
 
+    @BindView(R.id.subid)
+    TextView subId;
+
     Activity activity = MainActivity.this;
     public BackgroundService gpsService;
     public boolean mTracking = false;
@@ -77,12 +80,17 @@ public class MainActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(activity, wantPermission) != PackageManager.PERMISSION_GRANTED) {
             return null;
         }
-        String phone = phoneMgr.getLine1Number();
-        if (phone.length() > 12)
-            phone = phone.substring(1,13);
-        else
-            phone = phone.substring(0,12);
+        String phone = phoneMgr.getSubscriberId(); //imsi
+        //String imei = phoneMgr.getImei();
+        Log.d(TAG, "phone: " + phone);
+        if (phone.length() >= 15) {
+                phone = phone.substring(3, 15);
+        } else
+            return null;
+
         Log.i(TAG, phone);
+        subId.setText("Please register this device to cvatsp server(http://"+ mHost + ":8082/)with identity " + phone + ".");
+
         long l = 0;
         try {
             l = Long.parseLong(phone);
