@@ -264,15 +264,15 @@ public class LocationMessage extends Message {
                     IntegerUtils.asBytes(speed),
                     IntegerUtils.asBytes(direction),
                     IntegerUtils.toBcd(datetime),
-                    IntegerUtils.asBytes(0x01),
-                    IntegerUtils.asBytes(0x04),
-                    IntegerUtils.asBytes(odb_odometer),
-                    IntegerUtils.asBytes(0x02),
-                    IntegerUtils.asBytes(0x02),
-                    IntegerUtils.asBytes(fuellevel),
-                    IntegerUtils.asBytes(0x03),
-                    IntegerUtils.asBytes(0x02),
-                    IntegerUtils.asBytes(odb_speed));
+                    IntegerUtils.asBytes((byte) 0x01),
+                    IntegerUtils.asBytes((byte) 0x04),
+                    IntegerUtils.asBytes((int) odb_odometer),
+                    IntegerUtils.asBytes((byte) 0x02),
+                    IntegerUtils.asBytes((byte) 0x02),
+                    IntegerUtils.asBytes((short) fuellevel),
+                    IntegerUtils.asBytes((byte) 0x03),
+                    IntegerUtils.asBytes((byte) 0x02),
+                    IntegerUtils.asBytes((short) odb_speed));
             byte[] ln = IntegerUtils.toBcd(datetime);
             for (byte lbyte : ln)
                  System.out.printf("%02X", lbyte);

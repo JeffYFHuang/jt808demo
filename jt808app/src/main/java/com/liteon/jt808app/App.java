@@ -8,6 +8,7 @@ public class App {
         String host = argv[0];
         int port = Integer.parseInt(argv[1]);
         jt808App jt808 = new jt808App(host, port);
+        jt808.loadDrvData();
         jt808.connectToServer(host, port);
         long freeMem = 0;
         Runtime r = Runtime.getRuntime();

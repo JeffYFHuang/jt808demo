@@ -21,9 +21,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,6 +36,7 @@ import java.util.TimeZone;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Stream;
 import javax.xml.bind.DatatypeConverter;
 
 public class jt808App implements ClientStateCallback, GpsPositionListener{
@@ -50,6 +55,9 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
     private Timer mTimer = null;
     private TimerTask mUploadTimerTask = null;
     private final GpsManager gps;
+    
+    private double fuellevel = ClientConstants.CAR_FUEL_FULL;
+    private double odb_odometer = 0;
 
     public jt808App(String host, int port) {
 
@@ -236,19 +244,63 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
         return mJT808Client.isClosed();
     }
 
-    static double fuellevel = ClientConstants.CAR_FUEL_FULL;
+    public void loadDrvData() {
+        String fileName = ClientConstants.DRIVING_DATA;
+        File file = new File(fileName);
 
-    public void car_simulation (GpsPosition gps) {
+        try (Stream<String> linesStream = Files.lines(file.toPath())) {
+            linesStream.forEach((line) -> {
+                int idx = line.indexOf("odb_odometer");
+                if (idx >= 0)
+                {
+                    idx = line.indexOf(":");
+                    odb_odometer = (double) Integer.parseInt(line.substring(idx + 1));
+                    
+                    System.out.println("odb_odometer:" + odb_odometer);
+                }
+                idx = line.indexOf("fuellevel");
+                if (idx >= 0)
+                {
+                    idx = line.indexOf(":");
+                    fuellevel = (double) Integer.parseInt(line.substring(idx + 1));
+                    
+                    System.out.println(fuellevel);
+                    System.out.println("fuellevel:" + fuellevel);
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    
+    public void saveDrvData (String data) {
+        try {
+            File file = new File(ClientConstants.DRIVING_DATA);
+	    FileWriter fileWriter = new FileWriter(file);
+                       fileWriter.write(data+"\n");
+                       fileWriter.flush();
+                       fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void car_simulation (GpsPosition gps, boolean bspeed) {
         Random ran = new Random();
-	gps.odb_speed = ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //(int) minmea_tofloat(&frame.speed); //gps.speed; //
-	double distance = (double) (gps.odb_speed * 1.85200 * 1000.0 * 5); //5 secs distance
-	gps.odb_odometer += distance / 3600.0;
+	//gps.odb_speed = bspeed ? gps.speed : ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //gps.speed;
+        gps.odb_speed = gps.speed;
+        double distance = (double) (gps.odb_speed * 1.85200 * 1000.0 * 5); //5 secs distance
+	odb_odometer += distance / 3600.0;
+        gps.odb_odometer = odb_odometer;
 	fuellevel -= distance / ClientConstants.CAR_AVG_FUEL_CONSUMPTION;
 	if (fuellevel <= 0)
 		fuellevel = ClientConstants.CAR_FUEL_FULL;
         gps.fuellevel = fuellevel;
+        
+        saveDrvData ("odb_odometer:" + (int) odb_odometer + "\nfuellevel:" + (int) fuellevel);
 	System.out.println("speed odometer: " + gps.odb_odometer + ", level: " + gps.fuellevel + ", speed: " + gps.odb_speed);
-   }
+    }
 
     @Override
     public void positionReceived(GpsPosition pos) {
@@ -259,7 +311,8 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
         Logger.log("[GPS LOG]: " + pos.hasSignal() + ", isfix: " + pos.hasLocation());
         mLocationMessageBuilder.setGNSSFixed(pos.hasLocation());
         mLocationMessageBuilder.setGNSSAntennaLoss(!pos.hasSignal());
-        car_simulation (pos);
+        car_simulation (pos, pos.speed > 0);
+
         mLocationMessageBuilder.setLatitude(pos.lat)
                                .setLongitude(pos.lon)
                                .setSpeed(new Double(pos.speed).shortValue())

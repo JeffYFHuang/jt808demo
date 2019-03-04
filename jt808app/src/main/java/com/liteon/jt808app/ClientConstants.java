@@ -25,4 +25,6 @@ public class ClientConstants {
   public static final int    RESET_ODOMETER         = 2000;             // 2000 kms
   public static final double CAR_FUEL_FULL          = 55000.0;           // ml
   public static final double CAR_AVG_FUEL_CONSUMPTION = 10000.0; // meters/l
+  
+  public static final String DRIVING_DATA      = "/data/QuecOpen/jt808/drv.dat";
 }
