@@ -80,10 +80,10 @@ public class MainActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(activity, wantPermission) != PackageManager.PERMISSION_GRANTED) {
             return null;
         }
-        String phone = phoneMgr.getSubscriberId(); //imsi
-        //String imei = phoneMgr.getImei();
+        //String phone = phoneMgr.getSubscriberId(); //imsi
+        String phone = phoneMgr.getImei();
         Log.d(TAG, "phone: " + phone);
-        if (phone.length() >= 15) {
+        if (phone != null && phone.length() >= 15) {
                 phone = phone.substring(3, 15);
         } else
             return null;

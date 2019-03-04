@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Random;
 
 public class BackgroundService extends Service implements ClientStateCallback{
     private static final String TAG = LogUtils.makeTag(BackgroundService.class);
@@ -306,6 +307,24 @@ public class BackgroundService extends Service implements ClientStateCallback{
             return sdfDate.format(ts);
     }
 
+    static double fuellevel = ClientConstants.CAR_FUEL_FULL;
+    static double odb_odometer = 0;
+
+    public void car_simulation (Location location, MessageBuilder builder) {
+        Random ran = new Random();
+        double speed = ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //location.getSpeed(); //
+        ((LocationMessage.Builder) builder).setOdbSpeed((short) speed); //(int) minmea_tofloat(&frame.speed); //gps.speed; //
+        double distance = (double) (speed * 1.85200 * 1000.0 * 5); //5 secs distance
+
+        odb_odometer += distance / 3600.0;
+        ((LocationMessage.Builder) builder).setOdbMeters((int) odb_odometer);
+        fuellevel -= distance / ClientConstants.CAR_AVG_FUEL_CONSUMPTION;
+        if (fuellevel <= 0)
+            fuellevel = ClientConstants.CAR_FUEL_FULL;
+        ((LocationMessage.Builder) builder).setFuelLevel((short) fuellevel);
+        Log.i(TAG, "speed odometer: " + odb_odometer + ", level: " + fuellevel + ", speed: " + speed);
+    }
+
     private void sendLocation(){
         if(mJT808Client != null){
             Location location = mLocationListener.getLocation();
@@ -314,7 +333,7 @@ public class BackgroundService extends Service implements ClientStateCallback{
                     MessageBuilder builder = new LocationMessage.Builder();
                     ((LocationMessage.Builder) builder).setGNSSFixed(location.getTime() != 0);
                     builder.phone(mPhone);
-
+                    car_simulation (location, builder);
                     mJT808Client.sendMessage(((LocationMessage.Builder) builder)
                             .setLatitude(location.getLatitude())
                             .setLongitude(location.getLongitude())
