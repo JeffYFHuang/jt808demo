@@ -32,7 +32,10 @@ public class LocationMessage extends Message {
     private boolean GNSS_antenna_short = false;
     private boolean low_power          = false;
     private boolean power_off          = false;
-
+    //      additional information
+    private int odb_odometer = 0;
+    private short fuellevel  = 0;
+    private short odb_speed  = 0;
 //    private final byte[] alarmBytes;
 //    private final byte[] stateBytes;
 //    private final byte[] longitudeBytes;
@@ -82,6 +85,10 @@ public class LocationMessage extends Message {
         this.GNSS_antenna_short = builder.GNSS_antenna_short;
         this.low_power          = builder.low_power;
         this.power_off          = builder.power_off;
+        //      additional information
+        this.odb_odometer       = builder.odb_odometer;
+        this.fuellevel          = builder.fuellevel;
+        this.odb_speed          = builder.odb_speed;
     }
 
     public static class Builder extends MessageBuilder {
@@ -94,6 +101,10 @@ public class LocationMessage extends Message {
         private short speed      = 0;
         private short direction  = 0;
         private long timestamp   = 0;
+        //      additional information
+        private int odb_odometer = 0;
+        private short fuellevel  = 0;
+        private short odb_speed  = 0;
 
         private boolean emergency          = false;
         private boolean overspeed          = false;
@@ -192,6 +203,21 @@ public class LocationMessage extends Message {
             this.altitude = altitude;
             return this;
         }
+        //additional message
+        public Builder setOdbMeters(int odb_meters) {
+            this.odb_odometer = odb_meters;
+            return this;
+        }
+
+        public Builder setOdbSpeed(short odb_speed) {
+            this.odb_speed = odb_speed;
+            return this;
+        }
+
+        public Builder setFuelLevel(short fuellevel) {
+            this.fuellevel = fuellevel;
+            return this;
+        }
 
         @Override
         public LocationMessage build() {
@@ -208,12 +234,21 @@ public class LocationMessage extends Message {
             this.body = ArrayUtils.concatenate(
                     IntegerUtils.asBytes(alarm),
                     IntegerUtils.asBytes(state),
-                    IntegerUtils.asBytes((int)(latitude*1E6)),
-                    IntegerUtils.asBytes((int)(longitude*1E6)),
+                    IntegerUtils.asBytes(new Double(latitude*1E6).intValue()),
+                    IntegerUtils.asBytes(new Double(longitude*1E6).intValue()),
                     IntegerUtils.asBytes(altitude),
                     IntegerUtils.asBytes(speed),
                     IntegerUtils.asBytes(direction),
-                    IntegerUtils.toBcd(timestamp));
+                    IntegerUtils.toBcd(timestamp),
+                    IntegerUtils.asBytes((byte) 0x01),
+                    IntegerUtils.asBytes((byte) 0x04),
+                    IntegerUtils.asBytes((int) odb_odometer),
+                    IntegerUtils.asBytes((byte) 0x02),
+                    IntegerUtils.asBytes((byte) 0x02),
+                    IntegerUtils.asBytes((short) fuellevel),
+                    IntegerUtils.asBytes((byte) 0x03),
+                    IntegerUtils.asBytes((byte) 0x02),
+                    IntegerUtils.asBytes((short) odb_speed));
 
             return new LocationMessage(this);
         }
