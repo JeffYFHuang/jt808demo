@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
@@ -36,6 +37,7 @@ import java.util.TimeZone;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 import javax.xml.bind.DatatypeConverter;
 
@@ -286,22 +288,23 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
         }
     }
 
-    public void car_simulation (GpsPosition gps, boolean bspeed) {
+    public void car_simulation (GpsPosition gps, boolean bspeed, long tdiff) {
         Random ran = new Random();
-	//gps.odb_speed = bspeed ? gps.speed : ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //gps.speed;
-        gps.odb_speed = gps.speed;
-        double distance = (double) (gps.odb_speed * 1.85200 * 1000.0 * 5); //5 secs distance
-	odb_odometer += distance / 3600.0;
+	gps.odb_speed = bspeed ? gps.speed : ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //gps.speed;
+        //gps.odb_speed = gps.speed;
+        double distance = (double) (gps.odb_speed * 1.85200 * tdiff) / 3600.0; //tdiff secs distance
+	odb_odometer += distance;
         gps.odb_odometer = odb_odometer;
-	fuellevel -= distance / ClientConstants.CAR_AVG_FUEL_CONSUMPTION;
+	fuellevel -= distance * 0.1;
 	if (fuellevel <= 0)
 		fuellevel = ClientConstants.CAR_FUEL_FULL;
         gps.fuellevel = fuellevel;
         
         saveDrvData ("odb_odometer:" + (int) odb_odometer + "\nfuellevel:" + (int) fuellevel);
-	System.out.println("speed odometer: " + gps.odb_odometer + ", level: " + gps.fuellevel + ", speed: " + gps.odb_speed);
+	System.out.println("tdiff: " + tdiff + ", odometer: " + gps.odb_odometer + ", level: " + gps.fuellevel + ", constant fuel comsumption: " + distance * 0.1 + ", speed: " + gps.odb_speed);
     }
 
+    private Date date_prev = null;
     @Override
     public void positionReceived(GpsPosition pos) {
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyMMddHHmmss");
@@ -311,7 +314,20 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
         Logger.log("[GPS LOG]: " + pos.hasSignal() + ", isfix: " + pos.hasLocation());
         mLocationMessageBuilder.setGNSSFixed(pos.hasLocation());
         mLocationMessageBuilder.setGNSSAntennaLoss(!pos.hasSignal());
-        car_simulation (pos, pos.speed > 0);
+        Date datenow;
+        try {
+            datenow = sdfDate.parse(datetime);
+            if (date_prev == null) {
+               car_simulation (pos, pos.speed > 0, 0);
+            } else
+            {
+               long tdiff = datenow.getTime() - date_prev.getTime();
+               car_simulation (pos, pos.speed > 0, tdiff);
+            }
+            date_prev = datenow;
+        } catch (ParseException ex) {
+            java.util.logging.Logger.getLogger(jt808App.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         mLocationMessageBuilder.setLatitude(pos.lat)
                                .setLongitude(pos.lon)
