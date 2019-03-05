@@ -21,8 +21,11 @@ public class ClientConstants {
   public static final int    PREF_DEFAULT_PORT      = 5015;
 
   //for car simulation
+  public static final String PREF_KEY_ODOMETER      = "odometer";
+  public static final String PREF_KEY_FUELLEVEL      = "fuellevel";
+
   public static final int    CAR_AVG_SPEED          = 30;               // knots/hr
   public static final int    RESET_ODOMETER         = 2000;             // 2000 kms
-  public static final double CAR_FUEL_FULL          = 55000.0;           // ml
-  public static final double CAR_AVG_FUEL_CONSUMPTION = 10000.0; // meters/l
+  public static final int CAR_FUEL_FULL          = 55000;           // ml
+  public static final int CAR_AVG_FUEL_CONSUMPTION = 10000; // meters/l
 }

@@ -289,9 +289,9 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
     }
 
     public void car_simulation (GpsPosition gps, boolean bspeed, long tdiff) {
-        Random ran = new Random();
-	gps.odb_speed = bspeed ? gps.speed : ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //gps.speed;
-        //gps.odb_speed = gps.speed;
+        //Random ran = new Random();
+	//gps.odb_speed = bspeed ? gps.speed : ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //gps.speed;
+        gps.odb_speed = gps.speed;
         double distance = (double) (gps.odb_speed * 1.85200 * tdiff) / 3600.0; //tdiff secs distance
 	odb_odometer += distance;
         gps.odb_odometer = odb_odometer;
@@ -299,7 +299,7 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
 	if (fuellevel <= 0)
 		fuellevel = ClientConstants.CAR_FUEL_FULL;
         gps.fuellevel = fuellevel;
-        
+
         saveDrvData ("odb_odometer:" + (int) odb_odometer + "\nfuellevel:" + (int) fuellevel);
 	System.out.println("tdiff: " + tdiff + ", odometer: " + gps.odb_odometer + ", level: " + gps.fuellevel + ", constant fuel comsumption: " + distance * 0.1 + ", speed: " + gps.odb_speed);
     }

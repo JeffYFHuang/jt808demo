@@ -67,6 +67,9 @@ public class BackgroundService extends Service implements ClientStateCallback{
 
     private byte[] mPhone = null;
 
+    private double fuellevel;
+    private double odb_odometer;
+
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
@@ -179,6 +182,8 @@ public class BackgroundService extends Service implements ClientStateCallback{
         mHost = mPrefs.getString(ClientConstants.PREF_KEY_HOST, ClientConstants.PREF_DEFAULT_HOST);
         mPort = mPrefs.getInt(ClientConstants.PREF_KEY_PORT, ClientConstants.PREF_DEFAULT_PORT);
         mAuthCode = mPrefs.getString(ClientConstants.PREF_KEY_AUTH_CODE, null);
+        fuellevel = mPrefs.getInt(ClientConstants.PREF_KEY_FUELLEVEL, ClientConstants.CAR_FUEL_FULL);
+        odb_odometer = mPrefs.getInt(ClientConstants.PREF_KEY_ODOMETER, 0);
 
         if (mJT808Client == null) {
             mJT808Client = new JT808Client();
@@ -307,21 +312,26 @@ public class BackgroundService extends Service implements ClientStateCallback{
             return sdfDate.format(ts);
     }
 
-    static double fuellevel = ClientConstants.CAR_FUEL_FULL;
-    static double odb_odometer = 0;
-
     public void car_simulation (Location location, MessageBuilder builder) {
-        Random ran = new Random();
-        double speed = ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //location.getSpeed(); //
+        double speed = 0;
+        if (location.hasSpeed()) {
+            speed = location.getSpeed();
+        }/* else {
+            Random ran = new Random();
+            speed = ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //location.getSpeed(); //
+        }*/
         ((LocationMessage.Builder) builder).setOdbSpeed((short) speed); //(int) minmea_tofloat(&frame.speed); //gps.speed; //
-        double distance = (double) (speed * 1.85200 * 1000.0 * 5); //5 secs distance
+        double distance = (double) (speed * 1.85200 * 1000.0 * 5) / 3600.0; //5 secs distance
 
-        odb_odometer += distance / 3600.0;
+        odb_odometer += distance;
         ((LocationMessage.Builder) builder).setOdbMeters((int) odb_odometer);
-        fuellevel -= distance / ClientConstants.CAR_AVG_FUEL_CONSUMPTION;
+        mPrefs.edit().putInt(ClientConstants.PREF_KEY_ODOMETER, (int) odb_odometer).commit();
+
+        fuellevel -= distance * 0.1;
         if (fuellevel <= 0)
             fuellevel = ClientConstants.CAR_FUEL_FULL;
         ((LocationMessage.Builder) builder).setFuelLevel((short) fuellevel);
+        mPrefs.edit().putInt(ClientConstants.PREF_KEY_FUELLEVEL, (int) fuellevel).commit();
         Log.i(TAG, "speed odometer: " + odb_odometer + ", level: " + fuellevel + ", speed: " + speed);
     }
 
