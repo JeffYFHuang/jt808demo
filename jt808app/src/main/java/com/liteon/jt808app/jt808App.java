@@ -105,7 +105,7 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
 
     private void authenticate(String authCode) {
         if(authCode == null){
-            Logger.log("鉴权码为空");
+            Logger.log("auth code is empty!");
             return;
         }
         mJT808Client.authenticate(mAuthCode);
@@ -113,7 +113,7 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
 
     @Override
     public void connectSuccess() {
-        Logger.log("连接成功");
+        Logger.log("Connect success!");
         if(mAuthCode == null){
             registerClient();
         }else{
@@ -123,12 +123,12 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
 
     @Override
     public void connectFail() {
-        Logger.log("连接失败");
+        Logger.log("Connect fail!");
     }
 
     @Override
     public void connectionClosed() {
-        Logger.log("已关闭连接");
+        Logger.log("Connection closed!");
     }
 
     @Override
@@ -265,7 +265,7 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
                 {
                     idx = line.indexOf(":");
                     fuellevel = (double) Integer.parseInt(line.substring(idx + 1));
-                    
+
                     System.out.println(fuellevel);
                     System.out.println("fuellevel:" + fuellevel);
                 }
