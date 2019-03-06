@@ -315,7 +315,7 @@ public class BackgroundService extends Service implements ClientStateCallback{
     public void car_simulation (Location location, MessageBuilder builder) {
         double speed = 0;
         if (location.hasSpeed()) {
-            speed = location.getSpeed();
+            speed = location.getSpeed() * 3600.0 / 1852.0;
         }/* else {
             Random ran = new Random();
             speed = ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //location.getSpeed(); //
@@ -348,7 +348,7 @@ public class BackgroundService extends Service implements ClientStateCallback{
                             .setLatitude(location.getLatitude())
                             .setLongitude(location.getLongitude())
                             .setAltitude((short) location.getAltitude())
-                            .setSpeed((short) location.getSpeed())
+                            .setSpeed((short) (location.getSpeed() * 3600.0 / 1852.0))
                             .setDirection((short) location.getBearing())
                             .setTimestamp(Long.parseLong(getCurrentTimeStamp(location.getTime())))
                             .build());
