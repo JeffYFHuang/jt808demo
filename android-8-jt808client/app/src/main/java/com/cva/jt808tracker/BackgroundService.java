@@ -316,10 +316,17 @@ public class BackgroundService extends Service implements ClientStateCallback{
         double speed = 0;
         if (location.hasSpeed()) {
             speed = location.getSpeed() * 3600.0 / 1852.0;
+            double rpm = (location.getSpeed() * 60 / (0.4064 * 3.14));
+            ((LocationMessage.Builder) builder).setRpm((short) rpm);
+            Random ran = new Random();
+            double temp = (207.0 + ran.nextInt(12) - ran.nextInt(12));
+            ((LocationMessage.Builder) builder).setDevTemp((short) temp);
+            //195 to 220
         }/* else {
             Random ran = new Random();
             speed = ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //location.getSpeed(); //
         }*/
+
         ((LocationMessage.Builder) builder).setOdbSpeed((short) speed); //(int) minmea_tofloat(&frame.speed); //gps.speed; //
         double distance = (double) (speed * 1.85200 * 1000.0 * 5) / 3600.0; //5 secs distance
 

@@ -293,6 +293,11 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
 	//gps.odb_speed = bspeed ? gps.speed : ClientConstants.CAR_AVG_SPEED + ran.nextInt(10) - ran.nextInt(10); //gps.speed;
         gps.odb_speed = gps.speed;
         double distance = (double) (gps.odb_speed * 1.85200 * tdiff) / 3600.0; //tdiff secs distance
+        gps.rpm = gps.speed * 1.85200 / (60.0 * 0.4064 * 3.14);
+
+        Random ran = new Random();
+        gps.devtemp = (207.0 + ran.nextInt(12) - ran.nextInt(12));
+
 	odb_odometer += distance;
         gps.odb_odometer = odb_odometer;
 	fuellevel -= distance * 0.1;
@@ -337,7 +342,9 @@ public class jt808App implements ClientStateCallback, GpsPositionListener{
                                .setTimestamp(datetime)
                                .setOdbMeters((int) pos.odb_odometer)
                                .setFuelLevel((short) pos.fuellevel)
-                               .setOdbSpeed((short) pos.odb_speed);
+                               .setOdbSpeed((short) pos.odb_speed)
+                               .setRpm((short) pos.rpm)
+                               .setDevTemp((short) pos.devtemp);
       //  Logger.log("[GPS Time] " + pos.date);
       //  Logger.log("[GPS POS] " + pos);
         Logger.log("[GPS LocationMessage] " + mLocationMessageBuilder);

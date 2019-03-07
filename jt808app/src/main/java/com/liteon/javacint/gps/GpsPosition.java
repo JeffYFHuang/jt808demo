@@ -63,6 +63,8 @@ public class GpsPosition {
     public double odb_speed;
     public double odb_odometer;
     public double fuellevel;
+    public double rpm;
+    public double devtemp;
     /**
      * Creation of an empty position
      */
@@ -76,6 +78,8 @@ public class GpsPosition {
         odb_speed = 0;
         odb_odometer = 0;
         fuellevel = 0;
+        rpm = 0;
+        devtemp = 0;
     }
 
     /**
@@ -97,6 +101,8 @@ public class GpsPosition {
         odb_speed = source.odb_speed;
         odb_odometer = source.odb_odometer;
         fuellevel = source.fuellevel;
+        rpm = source.rpm;
+        devtemp = source.devtemp;
     }
 
     /**

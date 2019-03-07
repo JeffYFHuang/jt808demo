@@ -36,6 +36,8 @@ public class LocationMessage extends Message {
     private int odb_odometer = 0;
     private short fuellevel  = 0;
     private short odb_speed  = 0;
+    private short rpm        = 0;
+    private short devtemp    = 0;
 //    private final byte[] alarmBytes;
 //    private final byte[] stateBytes;
 //    private final byte[] longitudeBytes;
@@ -89,6 +91,8 @@ public class LocationMessage extends Message {
         this.odb_odometer       = builder.odb_odometer;
         this.fuellevel          = builder.fuellevel;
         this.odb_speed          = builder.odb_speed;
+        this.rpm                = builder.rpm;
+        this.devtemp            = builder.devtemp;
     }
 
     public static class Builder extends MessageBuilder {
@@ -105,6 +109,8 @@ public class LocationMessage extends Message {
         private int odb_odometer = 0;
         private short fuellevel  = 0;
         private short odb_speed  = 0;
+        private short rpm        = 0;
+        private short devtemp    = 0;
 
         private boolean emergency          = false;
         private boolean overspeed          = false;
@@ -219,6 +225,16 @@ public class LocationMessage extends Message {
             return this;
         }
 
+        public Builder setRpm(short rpm) {
+            this.rpm = rpm;
+            return this;
+        }
+
+        public Builder setDevTemp(short temp) {
+            this.devtemp = temp;
+            return this;
+        }
+
         @Override
         public LocationMessage build() {
 //            this.alarmBytes =  IntegerUtils.asBytes(alarm);
@@ -248,7 +264,13 @@ public class LocationMessage extends Message {
                     IntegerUtils.asBytes((short) fuellevel),
                     IntegerUtils.asBytes((byte) 0x03),
                     IntegerUtils.asBytes((byte) 0x02),
-                    IntegerUtils.asBytes((short) odb_speed));
+                    IntegerUtils.asBytes((short) odb_speed),
+                    IntegerUtils.asBytes((byte) 0x04),
+                    IntegerUtils.asBytes((byte) 0x02),
+                    IntegerUtils.asBytes((short) rpm),
+                    IntegerUtils.asBytes((byte) 0x05),
+                    IntegerUtils.asBytes((byte) 0x02),
+                    IntegerUtils.asBytes((short) devtemp));
 
             return new LocationMessage(this);
         }
